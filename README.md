@@ -2,11 +2,12 @@
 
 [![Build Status](https://secure.travis-ci.org/wwood/bioruby-velvet_underground.png)](http://travis-ci.org/wwood/bioruby-velvet_underground)
 
-Full description goes here
+This biogem is aimed at providing Ruby bindings to the velvet assembler's source code.
 
 Note: this software is under active development!
 
 ## Installation
+(not yet installable, I'm working on it)
 
 ```sh
 gem install bio-velvet_underground
@@ -14,8 +15,14 @@ gem install bio-velvet_underground
 
 ## Usage
 
+The only useful thing implemented at this stage is access to the binary sequence file created when velveth is run with the `-create_binary` flag.
+
 ```ruby
 require 'bio-velvet_underground'
+
+seqs = Bio::Velvet::Underground::BinarySequenceStore.new '/path/to/velvet/directory/CnyUnifiedSeq'
+seqs[1] #=> 'CACTTATCTCTACCAAAGATCACGATTTAGAATCAAACTATAAAGTTTTAGAAGATAAAGTAACAACTTATACATGGGGA'
+
 ```
 
 The API doc is online. For more code examples see the test files in
