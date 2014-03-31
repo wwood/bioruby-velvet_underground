@@ -38,3 +38,23 @@ index 8239e72..e0308db 100644
 +shared: zlib obj/shared
 +	cd obj/shared && gcc -shared -Wl,-soname,libvelvet.so.1 -o libvelvet.so.1.0 allocArray.o autoOpen.o binarySequences.o concatenatedGraph.o concatenatedPreGraph.o correctedGraph.o dfibHeap.o dfib.o fibHeap.o fib.o graph.o graphReConstruction.o graphStats.o kmer.o kmerOccurenceTable.o locallyCorrectedGraph.o passageMarker.o preGraphConstruction.o preGraph.o readCoherentGraph.o readSet.o recycleBin.o roadMap.o scaffold.o shortReadPairs.o splay.o splayTable.o tightString.o utility.o
 +
+diff --git a/src/utility.c b/src/utility.c
+index d402629..126b386 100644
+--- a/src/utility.c
++++ b/src/utility.c
+@@ -97,6 +97,7 @@ void exitErrorf(int exitStatus, boolean showErrno, const char *format, ...)
+ 
+ void velvetLog(const char *format, ...)
+ {
++/*
+   static boolean timeIsSet = false;
+   static struct timeval tvStart;
+   struct timeval tvNow;
+@@ -120,6 +121,7 @@ void velvetLog(const char *format, ...)
+ #ifdef DEBUG 
+   fflush(stdout);
+ #endif
++*/
+ }
+ 
+ void velvetFprintf(FILE * file, const char * format, ...) 
