@@ -16,12 +16,20 @@ Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
   gem.name = "bio-velvet_underground"
   gem.homepage = "http://github.com/wwood/bioruby-velvet_underground"
-  gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.license = "GPL"
+  gem.summary = %Q{Bindings to some internals of the velvet assembler}
+  gem.description = %Q{Bindings to some internals of the velvet assembler.}
   gem.email = "donttrustben@gmail.com"
   gem.authors = ["Ben Woodcroft"]
   # dependencies defined in Gemfile
+  gem.extensions = "ext/mkrf_conf.rb"
+
+  # by default, velvet as a git submodule is not included when making the gem
+  # but we need it to be.
+  gem.files.include "ext/src/src/*"
+  gem.files.include "ext/src/Makefile"
+  gem.files.include "ext/src/License"
+  gem.files.include "ext/src/third-party/**/*"
 end
 Jeweler::RubygemsDotOrgTasks.new
 
