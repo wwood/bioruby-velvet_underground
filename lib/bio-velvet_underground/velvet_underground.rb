@@ -5,7 +5,7 @@ module Bio
   module Velvet
     class Underground
       extend FFI::Library
-      ffi_lib File.join(File.dirname(__FILE__),'external','velvet.so.0.0.1')
+      ffi_lib File.join(File.dirname(__FILE__),'external','libvelvet.so.1.0')
 
       class BinarySequenceStore
         # Parse a CnyUnifiedSeq file in so that sequences can be accessed

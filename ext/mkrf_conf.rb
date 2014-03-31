@@ -24,13 +24,11 @@ path_external = File.join(File.dirname(__FILE__), "../lib/bio-velvet_underground
 
 task :compile do
 cd(File.join(File.dirname(__FILE__),'src')) do
-$stderr.puts "COMPILLLING"
     sh "patch < ../Makefile-bioruby.patch"
-$stderr.puts "COMPILLLING"
     case Config::CONFIG['host_os']
       when /linux/
         sh "make shared"
-        cp("obj/shared/velvet.so.0.0.1",path_external)
+        cp("obj/shared/libvelvet.so.1.0",path_external)
       when /darwin/
         raise NotImplementedError, "possibly will work, but bio-velvet_underground is not tested on OSX"
       when /mswin|mingw/ then raise NotImplementedError, "bio-velvet_underground library is not available for Windows platform"
@@ -42,7 +40,7 @@ task :clean do
   cd(File.join(path,'src')) do
     sh "make clean"
   end
-  rm(File.join(path_external,"velvet.so.0.0.1"))
+  rm(File.join(path_external,"libvelvet.so.1.0"))
 end
 
 task :default => [:compile]

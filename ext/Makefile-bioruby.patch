@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 8239e72..d0c7dd1 100644
+index 8239e72..e0308db 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -38,16 +38,17 @@ endif
@@ -30,11 +30,11 @@ index 8239e72..d0c7dd1 100644
 +sharedobjdir:
 +	mkdir -p obj/shared
 +
-+obj/shared: zlib sharedobjdir $(OBJSHARED)
++obj/shared: sharedobjdir $(OBJSHARED)
 +
 +obj/shared/%.o: src/%.c
 +	$(CC) -fPIC $(CFLAGS) $(DEBUG) $(DEF) -c $? -o $@
 +
 +shared: zlib obj/shared
-+	cd obj/shared && gcc -shared -Wl,-soname,libvelvet.so.0.0.1 -o velvet.so.0.0.1 allocArray.o autoOpen.o binarySequences.o concatenatedGraph.o concatenatedPreGraph.o correctedGraph.o dfibHeap.o dfib.o fibHeap.o fib.o graph.o graphReConstruction.o graphStats.o kmer.o kmerOccurenceTable.o locallyCorrectedGraph.o passageMarker.o preGraphConstruction.o preGraph.o readCoherentGraph.o readSet.o recycleBin.o roadMap.o scaffold.o shortReadPairs.o splay.o splayTable.o tightString.o utility.o
++	cd obj/shared && gcc -shared -Wl,-soname,libvelvet.so.1 -o libvelvet.so.1.0 allocArray.o autoOpen.o binarySequences.o concatenatedGraph.o concatenatedPreGraph.o correctedGraph.o dfibHeap.o dfib.o fibHeap.o fib.o graph.o graphReConstruction.o graphStats.o kmer.o kmerOccurenceTable.o locallyCorrectedGraph.o passageMarker.o preGraphConstruction.o preGraph.o readCoherentGraph.o readSet.o recycleBin.o roadMap.o scaffold.o shortReadPairs.o splay.o splayTable.o tightString.o utility.o
 +

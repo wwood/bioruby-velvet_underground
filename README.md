@@ -7,7 +7,6 @@ This biogem is aimed at providing Ruby bindings to the velvet assembler's source
 Note: this software is under active development!
 
 ## Installation
-(not yet installable, I'm working on it)
 
 ```sh
 gem install bio-velvet_underground
@@ -15,15 +14,18 @@ gem install bio-velvet_underground
 
 ## Usage
 
-The only useful thing implemented at this stage is access to the binary sequence file created when velveth is run with the `-create_binary` flag.
+The only thing implemented at this stage is access to the binary sequence file created when velveth is run with the `-create_binary` flag.
 
 ```ruby
 require 'bio-velvet_underground'
 
 seqs = Bio::Velvet::Underground::BinarySequenceStore.new '/path/to/velvet/directory/CnyUnifiedSeq'
 seqs[1] #=> 'CACTTATCTCTACCAAAGATCACGATTTAGAATCAAACTATAAAGTTTTAGAAGATAAAGTAACAACTTATACATGGGGA'
+seqs.length #=> 77 (there is 77 sequences in the CnyUnifiedSeq)
 
 ```
+
+Patches to other parts of velvet welcome.
 
 The API doc is online. For more code examples see the test files in
 the source tree.
@@ -39,10 +41,7 @@ The BioRuby community is on IRC server: irc.freenode.org, channel: #bioruby.
 
 ## Cite
 
-If you use this software, please cite one of
-  
-* [BioRuby: bioinformatics software for the Ruby programming language](http://dx.doi.org/10.1093/bioinformatics/btq475)
-* [Biogem: an effective tool-based approach for scaling up open source software development in bioinformatics](http://dx.doi.org/10.1093/bioinformatics/bts080)
+This software is currently unpublished.
 
 ## Biogems.info
 
