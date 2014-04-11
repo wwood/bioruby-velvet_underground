@@ -30,6 +30,21 @@ module Bio
         def length
           @readset[:readCount]
         end
+
+        def is_second_in_pair?(sequence_id)
+          if sequence_id==0 or sequence_id > @readset[:readCount]
+            raise "Invalid sequence_id #{sequence_id}"
+          end
+          Bio::Velvet::Underground.isSecondInPair @readset, sequence_id-1
+        end
+
+        def pair_id(sequence_id)
+          if is_second_in_pair?(sequence_id)
+            sequence_id-1
+          else
+            sequence_id+1
+          end
+        end
       end
 
       private
@@ -67,6 +82,9 @@ module Bio
       # TightString *getTightStringInArray(TightString * tString,
       #			   IDnum	 position);
       attach_function :getTightStringInArray, [:pointer, :int32], :pointer
+
+      # boolean isSecondInPair(ReadSet * reads, IDnum index);
+      attach_function :isSecondInPair, [:pointer, :int32], :bool
     end
   end
 end
