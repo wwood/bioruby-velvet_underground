@@ -24,4 +24,16 @@ describe "binary sequence store" do
       seqs[78]
       }.to raise_error
   end
+
+  it 'should be able to understand mates' do
+    path = File.join TEST_DATA_DIR, '2', 'CnyUnifiedSeq'
+    seqs = Bio::Velvet::Underground::BinarySequenceStore.new path
+    seqs.is_second_in_pair?(1).should == false
+    seqs.is_second_in_pair?(2).should == true
+    seqs.is_second_in_pair?(5).should == false
+    seqs.pair_id(1).should == 2
+    seqs.pair_id(2).should == 1
+    seqs.pair_id(5).should == 6
+    seqs.pair_id(6).should == 5
+  end
 end
