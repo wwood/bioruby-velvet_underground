@@ -1,12 +1,20 @@
-# Please require your code below, respecting the naming conventions in the
-# bioruby directory tree.
-#
-# For example, say you have a plugin named bio-plugin, the only uncommented
-# line in this file would be 
-#
-#   require 'bio/bio-plugin/plugin'
-#
-# In this file only require other files. Avoid other source code.
+require 'ffi'
+require 'pry'
 
-require 'bio-velvet_underground/velvet_underground.rb'
+module Bio
+  module Velvet
+    class Underground
+      extend FFI::Library
+      ffi_lib File.join(File.dirname(__FILE__),'bio-velvet_underground','external','libvelvet.so.1.0')
+    end
+  end
+end
+
+
+require 'bio-velvet_underground/binary_sequence_store'
+require 'bio-velvet_underground/graph'
+
+if __FILE__ == $0
+  binding.pry
+end
 
