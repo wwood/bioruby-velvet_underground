@@ -23,6 +23,8 @@ class Bio::Velvet::Underground
       @readset[:readCount]
     end
 
+    # Returns true if the sequence ID refers to the
+    # second in a pair of sequences.
     def is_second_in_pair?(sequence_id)
       if sequence_id==0 or sequence_id > @readset[:readCount]
         raise "Invalid sequence_id #{sequence_id}"
@@ -30,6 +32,7 @@ class Bio::Velvet::Underground
       Bio::Velvet::Underground.isSecondInPair @readset, sequence_id-1
     end
 
+    # Returns the ID of the given sequence_id's pair
     def pair_id(sequence_id)
       if is_second_in_pair?(sequence_id)
         sequence_id-1
