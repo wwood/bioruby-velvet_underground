@@ -15,28 +15,40 @@ class Bio::Velvet::Underground
     end
 
     def nodes
-      NodeArray.new @internal_graph_struct
+      NodeArray.new self
     end
 
+    def node_count
+      @internal_graph_struct[:nodeCount]
+    end
+
+    def hash_length
+      @internal_graph_struct[:wordLength]
+    end
+
+
     class NodeArray
-      def initialize(graph_struct)
-        @internal_graph_struct = graph_struct
+      def initialize(graph)
+        @graph = graph
       end
 
       def length
-        Bio::Velvet::Underground.nodeCount @internal_graph_struct
+        Bio::Velvet::Underground.nodeCount @graph.internal_graph_struct
       end
 
       def [](node_id)
-        pointer = Bio::Velvet::Underground.getNodeInGraph @internal_graph_struct, node_id
+        return nil if node_id < 1 or node_id > @graph.internal_graph_struct[:nodeCount]
+        pointer = Bio::Velvet::Underground.getNodeInGraph @graph.internal_graph_struct, node_id
         node_struct = Bio::Velvet::Underground::NodeStruct.new pointer
-        Node.new(@internal_graph_struct, node_struct)
+        Node.new(@graph, node_struct)
       end
     end
 
     class Node
-      def initialize(graph_struct, node_struct)
-        @internal_graph_struct = graph_struct
+      attr_accessor :internal_node_struct
+
+      def initialize(graph, node_struct)
+        @graph = graph
         @internal_node_struct = node_struct
       end
 
@@ -44,16 +56,65 @@ class Bio::Velvet::Underground
         @internal_node_struct[:ID]
       end
 
-      def short_reads
-        array_start_pointer = Bio::Velvet::Underground.getNodeReads @internal_node_struct, @internal_graph_struct
-        num_short_reads = Bio::Velvet::Underground.getNodeReadCount @internal_node_struct, @internal_graph_struct
+      def length_alone
+        @internal_node_struct[:length]
+      end
+
+      def coverages
+        [
+          @internal_node_struct[:virtualCoverage1],
+          @internal_node_struct[:virtualCoverage2],
+          ]
+      end
+
+      def ends_of_kmers_of_node
+        seq = []
+        key = %w(A C G T)
+        0.upto(length_alone-1) do |i|
+          n = Bio::Velvet::Underground.getNucleotideInNode(@internal_node_struct, i)
+          seq.push key[n]
+        end
+        return seq.join
+      end
+
+      def ends_of_kmers_of_twin_node
+        twin.ends_of_kmers_of_node
+      end
+
+      def twin
+        return @twin unless @twin.nil?
+
+        twin_pointer = Bio::Velvet::Underground.getTwinNode(@internal_node_struct)
+        @twin = Bio::Velvet::Underground::Graph::Node.new(
+          @graph,
+          Bio::Velvet::Underground::NodeStruct.new(twin_pointer)
+          )
+      end
+
+      def fwd_short_reads
+        array_start_pointer = Bio::Velvet::Underground.getNodeReads @internal_node_struct, @graph.internal_graph_struct
+        num_short_reads = Bio::Velvet::Underground.getNodeReadCount @internal_node_struct, @graph.internal_graph_struct
         short_reads = (0...num_short_reads).collect do |i|
           # Use the fact that FFI pointers can do pointer arithmetic
-          pointer = array_start_pointer+i
-          NodedRead.new @internal_graph_struct, Bio::Velvet::Underground::ShortReadMarker.new(pointer)
+          pointer = array_start_pointer+(i*Bio::Velvet::Underground::ShortReadMarker.size)
+          NodedRead.new Bio::Velvet::Underground::ShortReadMarker.new(pointer), true
         end
         return short_reads
       end
+
+      def rev_short_reads
+        twin.fwd_short_reads
+      end
+
+      def short_reads
+        reads = fwd_short_reads
+        rev_short_reads.each do |read|
+          read.direction = false
+          reads.push read
+        end
+        return reads
+      end
+
     end
 
     class ArcArray
@@ -62,12 +123,16 @@ class Bio::Velvet::Underground
       end
 
       def get_arcs_by_node_id(node_id1, node_id2=nil)
+        raise
       end
     end
 
     class NodedRead
-      def initialize(short_read_struct)
+      attr_accessor :direction
+
+      def initialize(short_read_struct, direction)
         @internal_short_read_struct = short_read_struct
+        @direction = direction
       end
 
       def read_id
@@ -81,10 +146,6 @@ class Bio::Velvet::Underground
       def start_coord
         @internal_short_read_struct[:position]
       end
-
-      def direction
-        raise
-      end
     end
   end
 
@@ -95,10 +156,15 @@ class Bio::Velvet::Underground
     layout :nodes, :pointer, # Node **nodes;
     :arcLookupTable, :pointer, # Arc **arcLookupTable;
     :nodeReads, :pointer, # ShortReadMarker **nodeReads;
-    :nodeReadCounts, :int32, # IDnum *nodeReadCounts;
+    :nodeReadCounts, :pointer, # IDnum *nodeReadCounts;
     :gapMarkers, :pointer, # GapMarker **gapMarkers;
-    :insertLengths, :pointer, # Coordinate insertLengths[CATEGORIES + 1];
-    :insertLengths_var, :pointer, # double insertLengths_var[CATEGORIES + 1];
+    #TODO: here default compilation settins are assumed (CATEGORIES=2) - probably not a future-proof assumption
+    :insertLengths0, :int64, # Coordinate insertLengths[CATEGORIES + 1];
+    :insertLengths1, :int64, # Coordinate insertLengths[CATEGORIES + 1];
+    :insertLengths2, :int64, # Coordinate insertLengths[CATEGORIES + 1];
+    :insertLengths_var0, :pointer, # double insertLengths_var[CATEGORIES + 1];
+    :insertLengths_var1, :pointer, # double insertLengths_var[CATEGORIES + 1];
+    :insertLengths_var2, :pointer, # double insertLengths_var[CATEGORIES + 1];
     :sequenceCount, :int32, # IDnum sequenceCount;
     :nodeCount, :int32, # IDnum nodeCount;
     :wordLength, :int, # int wordLength;
@@ -106,20 +172,26 @@ class Bio::Velvet::Underground
   end
 
   class NodeStruct < FFI::Struct
+    pack 1  # pack all members on a 1 byte boundary
     #     struct node_st {
     layout :twinNode, :pointer, # 	Node *twinNode;		// 64
     :arc, :pointer, # 	Arc *arc;		// 64
     :descriptor, :pointer, # 	Descriptor *descriptor;	// 64
-    :marker, :pointer, # 	PassageMarkerI marker;	// 32
+    :marker, :uint32, # 	PassageMarkerI marker;	// 32
     :length, :int32, # 	IDnum length;	// 32
-    :virtualCoverage, :int32, #   	IDnum virtualCoverage;	// 32 * 2
+    :virtualCoverage1, :int32, # IDnum virtualCoverage[CATEGORIES];	// 32 * 2
+    :virtualCoverage2, :int32,
+	  :originalVirtualCoverage1, :int32, # IDnum originalVirtualCoverage[CATEGORIES];	// 32 * 2
+	  :originalVirtualCoverage2, :int32,
     :ID, :int32, # 	IDnum ID;		// 32
     :arcCount, :int32, # 	IDnum arcCount;		// 32
-    :status, :bool, # 	boolean status;		// 1
-    :uniqueness, :bool# 	boolean uniqueness;	// 1
+    :status, :int8, # 	boolean status;		// 1
+    :uniqueness, :int8 # 	boolean uniqueness;	// 1
+    #} ATTRIBUTE_PACKED;
   end
 
   class ArcStruct < FFI::Struct
+    pack 1  # pack all members on a 1 byte boundary
     # struct arc_st {
     layout :twinArc, :pointer, # 	Arc *twinArc;		// 64
     :next, :pointer, # 	Arc *next;		// 64
@@ -127,14 +199,15 @@ class Bio::Velvet::Underground
     :nextInLookupTable, :pointer, # 	Arc *nextInLookupTable;	// 64
     :destination, :pointer, # 	Node *destination;	// 64
     :multiplicity, :int32 # 	IDnum multiplicity;	// 32
-    # }
+    # } ATTRIBUTE_PACKED;
   end
 
   class ShortReadMarker < FFI::Struct
+    pack 1  # pack all members on a 1 byte boundary
     # struct shortReadMarker_st {
     layout :position, :int32, # 	IDnum position;
     :readID, :int32, # 	IDnum readID;
-    :offset, :int32 # 	ShortLength offset;
+    :offset, :int16 # 	ShortLength offset;
     # } ATTRIBUTE_PACKED;
   end
 
@@ -145,9 +218,12 @@ class Bio::Velvet::Underground
   attach_function :getArcBetweenNodes, [:pointer, :pointer, :pointer], :pointer
 
   # Nucleotide getNucleotideInNode(Node * node, Coordinate index) {
+  attach_function :getNucleotideInNode, [:pointer, :int32], :char
   # IDnum getNodeID(Node * node)
   # Node *getNodeInGraph(Graph * graph, IDnum nodeID)
   attach_function :getNodeInGraph, [:pointer, :int32], :pointer
+  # Node *getTwinNode(Node * node);
+  attach_function :getTwinNode, [:pointer], :pointer
 
   # ShortReadMarker *getNodeReads(Node * node, Graph * graph);
   attach_function :getNodeReads, [:pointer, :pointer], :pointer
