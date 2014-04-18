@@ -1,4 +1,7 @@
+require 'csv'
+
 class Bio::Velvet::Underground
+
   class Graph
     attr_accessor :internal_graph_struct
 
@@ -9,6 +12,21 @@ class Bio::Velvet::Underground
 
     # Read in a graph from a file
     def self.parse_from_file(path)
+      # First read the first line of the file to determine which library to load
+      hash_length = nil
+      CSV.foreach(path, :col_sep => "\t") do |row|
+        raise "Badly formatted graph file" unless row.length == 3
+        hash_length = row[2].to_i
+        if hash_length < 1 or hash_length > Bio::Velvet::Underground.max_kmers.max
+          raise "unable to load velvet shared library for kmer length `#{hash_length}'"
+        end
+      end
+      raise "No lines in graph file `#{path}', is it really a velvet LastGraph-type file?" if hash_length.nil?
+
+      # setup FFI in the underground base class with the correct kmer length
+      Bio::Velvet::Underground.attach_shared_library(:kmer => hash_length)
+
+      # Using the loaded velvet library, do the actual import of the graph
       pointer = Bio::Velvet::Underground.importGraph path
       struct = Bio::Velvet::Underground::GraphStruct.new pointer
       Graph.new struct
