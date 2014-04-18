@@ -14,7 +14,10 @@ module Bio
 
       # Where is the library given the max_kmer_length
       def self.library_location_of(max_kmer_length=nil)
-        raise "bad max kmer length #{max_kmer_length}" unless max_kmers.include?(max_kmer_length)
+        if !Bio::Velvet::Underground.max_kmers.include?(max_kmer_length) and
+          !max_kmer_length.nil?
+          raise "bad max kmer length #{max_kmer_length}"
+        end
 
         extras = []
         if !max_kmer_length.nil? and max_kmer_length != DEFAULT_MAXKMERLENGTH
@@ -22,9 +25,9 @@ module Bio
         end
         return File.join(
           File.dirname(__FILE__),
-          'bio-velvet_underground',
           'external',
-          "libvelvet#{extras.join('')}.so.1.0")
+          "libvelvet#{extras.join('') }.so.1.0")
       end
+    end
   end
 end

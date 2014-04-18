@@ -13,7 +13,7 @@ Version = version.read
 version.close
 
 File.open(File.join(path,"Rakefile"),"w") do |rakefile|
-#rakefile.write <<-RAKE FIXMEEE
+rakefile.write <<-RAKE
 require 'rbconfig'
 require 'fileutils'
 include FileUtils::Verbose
@@ -31,20 +31,22 @@ task :compile do
     case Config::CONFIG['host_os']
       when /linux/
 
-      # Create library with default install params
-      sh "make shared"
-      shared_location = 'obj/shared'
-      cp(File.join(shared_location,"libvelvet.so.1.0"), path_external)
-      # Create libraries with larger non-default kmer sizes
-      Bio::Velvet::Underground.max_kmer_sizes.each do |max_kmer|
-        next if max_kmer == Bio::Velvet::Underground::DEFAULT_MAXKMERLENGTH
-        $stderr.puts "Compiling velvet with kmer #{max_kmer}.."
-        library_name = File.basename Bio::Velvet::Underground.library_location_of(max_kmer)
-        sh "make MAXKMERLENGTH=#{max_kmer} shared"
-        cp(File.join(shared_location,File.basename(library_name)),
-          path_external)
-      end
+        # Create library with default install params
+        $stdout.puts "Making velvet shared library with default parameters"
+        sh "make shared"
+        shared_location = 'obj/shared'
+        cp(File.join(shared_location,"libvelvet.so.1.0"), path_external)
+        $stdout.puts "Finished installing default library version"
+        # Create libraries with larger non-default kmer sizes
+        Bio::Velvet::Underground.max_kmers.each do |max_kmer|
+          next if max_kmer == Bio::Velvet::Underground::DEFAULT_MAXKMERLENGTH
 
+          $stdout.puts "Making velvet shared library with kmer "+max_kmer.to_s
+          library_name = File.basename Bio::Velvet::Underground.library_location_of(max_kmer)
+          sh "make clean; make MAXKMERLENGTH="+max_kmer.to_s+" shared"
+          cp(File.join(shared_location,"libvelvet.so.1.0"),
+          File.join(path_external,File.basename(library_name)))
+        end
 
       when /darwin/
         raise NotImplementedError, "possibly will work, but bio-velvet_underground is not tested on OSX"

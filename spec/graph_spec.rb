@@ -9,6 +9,13 @@ describe "graph" do
     graph.node_count.should == 4
   end
 
+  it 'should be able to parse a graph with kmer length > 31, the default' do
+    path = File.join TEST_DATA_DIR, '4', 'LastGraphKmer51Head'
+    graph = Bio::Velvet::Underground::Graph.parse_from_file path
+
+    graph.hash_length.should == 51
+  end
+
   describe "nodes" do
     it "should provide basic info" do
       path = File.join TEST_DATA_DIR, '3', 'Assem', 'LastGraph'

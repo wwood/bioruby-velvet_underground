@@ -2,6 +2,7 @@ class Bio::Velvet::Underground
   class BinarySequenceStore
     # Parse a CnyUnifiedSeq file in so that sequences can be accessed
     def initialize(cny_unified_seq_file)
+      Bio::Velvet::Underground.attach_shared_library
       readset_pointer = Bio::Velvet::Underground.importCnyReadSet cny_unified_seq_file
       @readset = Bio::Velvet::Underground::ReadSet.new(readset_pointer)
     end
@@ -68,16 +69,18 @@ class Bio::Velvet::Underground
     :readCount, :int32 # IDnum readCount;
   end
 
-  # ReadSet *importCnyReadSet(char *filename);
-  attach_function :importCnyReadSet, [:string], :pointer
+  def self.attach_binary_sequence_functions
+    # ReadSet *importCnyReadSet(char *filename);
+    attach_function :importCnyReadSet, [:string], :pointer
 
-  # char *readTightString(TightString * tString); #tightString.h
-  attach_function :readTightString, [:pointer], :string
+    # char *readTightString(TightString * tString); #tightString.h
+    attach_function :readTightString, [:pointer], :string
 
-  # TightString *getTightStringInArray(TightString * tString,
-  #			   IDnum	 position);
-  attach_function :getTightStringInArray, [:pointer, :int32], :pointer
+    # TightString *getTightStringInArray(TightString * tString,
+    #			   IDnum	 position);
+    attach_function :getTightStringInArray, [:pointer, :int32], :pointer
 
-  # boolean isSecondInPair(ReadSet * reads, IDnum index);
-  attach_function :isSecondInPair, [:pointer, :int32], :bool
+    # boolean isSecondInPair(ReadSet * reads, IDnum index);
+    attach_function :isSecondInPair, [:pointer, :int32], :bool
+  end
 end

@@ -15,11 +15,12 @@ class Bio::Velvet::Underground
       # First read the first line of the file to determine which library to load
       hash_length = nil
       CSV.foreach(path, :col_sep => "\t") do |row|
-        raise "Badly formatted graph file" unless row.length == 3
+        raise "Badly formatted graph file" if row.length < 3
         hash_length = row[2].to_i
         if hash_length < 1 or hash_length > Bio::Velvet::Underground.max_kmers.max
           raise "unable to load velvet shared library for kmer length `#{hash_length}'"
         end
+        break
       end
       raise "No lines in graph file `#{path}', is it really a velvet LastGraph-type file?" if hash_length.nil?
 
@@ -229,22 +230,24 @@ class Bio::Velvet::Underground
     # } ATTRIBUTE_PACKED;
   end
 
-  attach_function :importGraph, [:string], :pointer
-  attach_function :nodeCount, [:pointer], :int32
-  # Arc *getArcBetweenNodes(Node * originNode, Node * destinationNode,
-  # Graph * graph)
-  attach_function :getArcBetweenNodes, [:pointer, :pointer, :pointer], :pointer
+  def self.attach_graph_functions
+    attach_function :importGraph, [:string], :pointer
+    attach_function :nodeCount, [:pointer], :int32
+    # Arc *getArcBetweenNodes(Node * originNode, Node * destinationNode,
+    # Graph * graph)
+    attach_function :getArcBetweenNodes, [:pointer, :pointer, :pointer], :pointer
 
-  # Nucleotide getNucleotideInNode(Node * node, Coordinate index) {
-  attach_function :getNucleotideInNode, [:pointer, :int32], :char
-  # IDnum getNodeID(Node * node)
-  # Node *getNodeInGraph(Graph * graph, IDnum nodeID)
-  attach_function :getNodeInGraph, [:pointer, :int32], :pointer
-  # Node *getTwinNode(Node * node);
-  attach_function :getTwinNode, [:pointer], :pointer
+    # Nucleotide getNucleotideInNode(Node * node, Coordinate index) {
+    attach_function :getNucleotideInNode, [:pointer, :int32], :char
+    # IDnum getNodeID(Node * node)
+    # Node *getNodeInGraph(Graph * graph, IDnum nodeID)
+    attach_function :getNodeInGraph, [:pointer, :int32], :pointer
+    # Node *getTwinNode(Node * node);
+    attach_function :getTwinNode, [:pointer], :pointer
 
-  # ShortReadMarker *getNodeReads(Node * node, Graph * graph);
-  attach_function :getNodeReads, [:pointer, :pointer], :pointer
-  # IDnum getNodeReadCount(Node * node, Graph * graph);
-  attach_function :getNodeReadCount, [:pointer, :pointer], :int32
+    # ShortReadMarker *getNodeReads(Node * node, Graph * graph);
+    attach_function :getNodeReads, [:pointer, :pointer], :pointer
+    # IDnum getNodeReadCount(Node * node, Graph * graph);
+    attach_function :getNodeReadCount, [:pointer, :pointer], :int32
+  end
 end
