@@ -159,11 +159,11 @@ class Bio::Velvet::Underground
       end
 
       def offset_from_start_of_node
-        @internal_short_read_struct[:offset]
+        @internal_short_read_struct[:position]
       end
 
       def start_coord
-        @internal_short_read_struct[:position]
+        @internal_short_read_struct[:offset]
       end
     end
   end
