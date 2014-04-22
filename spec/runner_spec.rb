@@ -2,6 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'tmpdir'
 
+#Bio::Log::CLI.logger('stderr'); Bio::Log::CLI.trace('debug'); log = Bio::Log::LoggerPlus.new('bio-velvet_underground'); Bio::Log::CLI.configure('bio-velvet_underground')
 describe "runner" do
   it "should run basic" do
     reads = File.join TEST_DATA_DIR, '3', 'Sequences'

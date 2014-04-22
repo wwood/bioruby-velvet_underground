@@ -51,3 +51,4 @@ pkg
 Gemfile.lock
 *.gemspec
 lib/bio-velvet_underground/external/libvelvet.so.1.0
+lib/bio-velvet_underground/external/*.so.*

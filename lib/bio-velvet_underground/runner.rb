@@ -27,7 +27,6 @@ class Bio::Velvet::Underground
         velveth_array_of_strings << FFI::MemoryPointer.from_string(o)
       end
       velveth_array_of_strings << nil
-      p velveth_array_of_strings
       argv = FFI::MemoryPointer.new(:pointer, velveth_array_of_strings.length)
       velveth_array_of_strings.each_with_index do |p, i|
         argv[i].put_pointer(0,  p)
