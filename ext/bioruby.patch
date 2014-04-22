@@ -1,27 +1,102 @@
 diff --git a/Makefile b/Makefile
-index 8239e72..e0308db 100644
+index 8239e72..147919e 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -38,16 +38,17 @@ endif
+@@ -19,14 +19,14 @@ endif
+ 
+ ifdef VBIGASSEMBLY
+ override DEF := $(DEF) -D BIGASSEMBLY -D VBIGASSEMBLY
+-endif 	
++endif
+ 
+ 
+ ifdef LONGSEQUENCES
+ override DEF := $(DEF) -D LONGSEQUENCES
+ endif
+ 
+-# OpenMP 
++# OpenMP
+ ifdef OPENMP
+ override CFLAGS := $(CFLAGS) -fopenmp
+ endif
+@@ -38,23 +38,24 @@ endif
  
  OBJ = obj/tightString.o obj/run.o obj/splay.o obj/splayTable.o obj/graph.o obj/run2.o obj/fibHeap.o obj/fib.o obj/concatenatedGraph.o obj/passageMarker.o obj/graphStats.o obj/correctedGraph.o obj/dfib.o obj/dfibHeap.o obj/recycleBin.o obj/readSet.o obj/binarySequences.o obj/shortReadPairs.o obj/locallyCorrectedGraph.o obj/graphReConstruction.o obj/roadMap.o obj/preGraph.o obj/preGraphConstruction.o obj/concatenatedPreGraph.o obj/readCoherentGraph.o obj/utility.o obj/kmer.o obj/scaffold.o obj/kmerOccurenceTable.o obj/allocArray.o obj/autoOpen.o
  OBJDBG = $(subst obj,obj/dbg,$(OBJ))
 +OBJSHARED = $(subst obj,obj/shared,$(OBJ))
  
- default : cleanobj zlib obj velveth velvetg doc
+-default : cleanobj zlib obj velveth velvetg doc
++default : zlib obj velveth velvetg
  
  clean : clean-zlib
 -	-rm obj/*.o obj/dbg/*.o ./velvet* 
-+	-rm obj/*.o obj/dbg/*.o obj/shared/*.o obj/shared/velvet.so.0.0.1 ./velvet* 
++	-rm obj/*.o obj/dbg/*.o obj/shared/*.o obj/shared/velvet.so.0.0.1 ./velvet*
  	-rm -f doc/manual_src/Manual.toc doc/manual_src/Manual.aux doc/manual_src/Manual.out doc/manual_src/Manual.log
  	-rm -f doc/manual_src/Columbus_manual.aux doc/manual_src/Columbus_manual.out doc/manual_src/Columbus_manual.log
  
- cleanobj: 
+-cleanobj: 
 -	-rm obj/*.o obj/dbg/*.o 
++cleanobj:
 +	-rm obj/*.o obj/dbg/*.o obj/shared/*.o
  
  ifdef BUNDLEDZLIB
  Z_LIB_DIR=third-party/zlib-1.2.3
+ Z_LIB_FILES=$(Z_LIB_DIR)/*.o
+ override DEF := $(DEF) -D BUNDLEDZLIB
+ 
+-zlib: 
++zlib:
+ 	cd $(Z_LIB_DIR); ./configure; make; rm minigzip.o; rm example.o
+ 
+ clean-zlib :
+@@ -66,14 +67,14 @@ zlib :
+ clean-zlib :
+ endif
+ 
+-velveth : obj 
++velveth : obj
+ 	$(CC) $(CFLAGS) $(OPT) $(LDFLAGS) -o velveth obj/tightString.o obj/run.o obj/recycleBin.o obj/splay.o obj/splayTable.o obj/readSet.o obj/binarySequences.o obj/utility.o obj/kmer.o obj/kmerOccurenceTable.o obj/autoOpen.o $(Z_LIB_FILES) $(LIBS)
+ 
+ 
+ velvetg : obj
+ 	$(CC) $(CFLAGS) $(OPT) $(LDFLAGS) -o velvetg obj/tightString.o obj/graph.o obj/run2.o obj/fibHeap.o obj/fib.o obj/concatenatedGraph.o obj/passageMarker.o obj/graphStats.o obj/correctedGraph.o obj/dfib.o obj/dfibHeap.o obj/recycleBin.o obj/readSet.o obj/binarySequences.o obj/shortReadPairs.o obj/scaffold.o obj/locallyCorrectedGraph.o obj/graphReConstruction.o obj/roadMap.o obj/preGraph.o obj/preGraphConstruction.o obj/concatenatedPreGraph.o obj/readCoherentGraph.o obj/utility.o obj/kmer.o obj/kmerOccurenceTable.o obj/allocArray.o obj/autoOpen.o $(Z_LIB_FILES) $(LIBS)
+ 
+-debug : override DEF := $(DEF) -D DEBUG 
++debug : override DEF := $(DEF) -D DEBUG
+ debug : cleanobj obj/dbg
+ 	$(CC) $(CFLAGS) $(LDFLAGS) $(DEBUG) -o velveth obj/dbg/tightString.o obj/dbg/run.o obj/dbg/recycleBin.o obj/dbg/splay.o obj/dbg/splayTable.o obj/dbg/readSet.o obj/dbg/binarySequences.o obj/dbg/utility.o obj/dbg/kmer.o obj/dbg/kmerOccurenceTable.o obj/dbg/allocArray.o obj/dbg/autoOpen.o $(Z_LIB_FILES) $(LIBS)
+ 	$(CC) $(CFLAGS) $(LDFLAGS) $(DEBUG) -o velvetg obj/dbg/tightString.o obj/dbg/graph.o obj/dbg/run2.o obj/dbg/fibHeap.o obj/dbg/fib.o obj/dbg/concatenatedGraph.o obj/dbg/passageMarker.o obj/dbg/graphStats.o obj/dbg/correctedGraph.o obj/dbg/dfib.o obj/dbg/dfibHeap.o obj/dbg/recycleBin.o obj/dbg/readSet.o obj/dbg/binarySequences.o obj/dbg/shortReadPairs.o obj/dbg/scaffold.o obj/dbg/locallyCorrectedGraph.o obj/dbg/graphReConstruction.o obj/dbg/roadMap.o obj/dbg/preGraph.o obj/dbg/preGraphConstruction.o obj/dbg/concatenatedPreGraph.o obj/dbg/readCoherentGraph.o obj/dbg/utility.o obj/dbg/kmer.o obj/dbg/kmerOccurenceTable.o obj/dbg/allocArray.o obj/dbg/autoOpen.o $(Z_LIB_FILES) $(LIBS)
+@@ -91,25 +92,25 @@ colordebug : cleanobj obj/dbg_de
+ objdir:
+ 	mkdir -p obj
+ 
+-obj: zlib cleanobj objdir $(OBJ)
++obj: zlib objdir $(OBJ)
+ 
+ obj_de: override DEF := $(DEF) -D COLOR
+ obj_de: zlib cleanobj objdir $(OBJ)
+ 
+-obj/dbgdir: 
++obj/dbgdir:
+ 	mkdir -p obj/dbg
+ 
+-obj/dbg: override DEF := $(DEF) -D DEBUG 
++obj/dbg: override DEF := $(DEF) -D DEBUG
+ obj/dbg: zlib cleanobj obj/dbgdir $(OBJDBG)
+ 
+ obj/dbg_de: override DEF := $(DEF) -D COLOR -D DEBUG
+ obj/dbg_de: zlib cleanobj obj/dbgdir $(OBJDBG)
+ 
+ obj/%.o: src/%.c
+-	$(CC) $(CFLAGS) $(OPT) $(DEF) -c $? -o $@ 
++	$(CC) $(CFLAGS) $(OPT) $(DEF) -c $? -o $@
+ 
+ obj/dbg/%.o: src/%.c
+-	$(CC) $(CFLAGS) $(DEBUG) $(DEF) -c $? -o $@ 
++	$(CC) $(CFLAGS) $(DEBUG) $(DEF) -c $? -o $@
+ 
+ doc: Manual.pdf
+ 
 @@ -118,3 +119,15 @@ Manual.pdf: doc/manual_src/Manual.tex doc/manual_src/Columbus_manual.tex
  
  test: velvetg velveth
@@ -36,25 +111,523 @@ index 8239e72..e0308db 100644
 +	$(CC) -fPIC $(CFLAGS) $(DEBUG) $(DEF) -c $? -o $@
 +
 +shared: zlib obj/shared
-+	cd obj/shared && gcc -shared -Wl,-soname,libvelvet.so.1 -o libvelvet.so.1.0 allocArray.o autoOpen.o binarySequences.o concatenatedGraph.o concatenatedPreGraph.o correctedGraph.o dfibHeap.o dfib.o fibHeap.o fib.o graph.o graphReConstruction.o graphStats.o kmer.o kmerOccurenceTable.o locallyCorrectedGraph.o passageMarker.o preGraphConstruction.o preGraph.o readCoherentGraph.o readSet.o recycleBin.o roadMap.o scaffold.o shortReadPairs.o splay.o splayTable.o tightString.o utility.o
++	cd obj/shared && gcc -shared -Wl,-soname,libvelvet.so.1 -o libvelvet.so.1.0 allocArray.o autoOpen.o binarySequences.o concatenatedGraph.o concatenatedPreGraph.o correctedGraph.o dfibHeap.o dfib.o fibHeap.o fib.o graph.o graphReConstruction.o graphStats.o kmer.o kmerOccurenceTable.o locallyCorrectedGraph.o passageMarker.o preGraphConstruction.o preGraph.o readCoherentGraph.o readSet.o recycleBin.o roadMap.o scaffold.o shortReadPairs.o splay.o splayTable.o tightString.o utility.o run.o run2.o
 +
-diff --git a/src/utility.c b/src/utility.c
-index d402629..126b386 100644
---- a/src/utility.c
-+++ b/src/utility.c
-@@ -97,6 +97,7 @@ void exitErrorf(int exitStatus, boolean showErrno, const char *format, ...)
+diff --git a/src/concatenatedPreGraph.c b/src/concatenatedPreGraph.c
+index 39c1e0f..2c5fb5b 100644
+--- a/src/concatenatedPreGraph.c
++++ b/src/concatenatedPreGraph.c
+@@ -47,7 +47,7 @@ static void concatenatePreNodes(IDnum preNodeAID, PreArcI oldPreArc,
+ 		       hasSinglePreArc_pg(getOtherEnd_pg
+ 					  (preArc, preNodeBID),
+ 					  preGraph)
+-		       && !isLoop_pg(preArc) 
++		       && !isLoop_pg(preArc)
+ 		       && getDestination_pg(preArc, preNodeBID) != preNodeAID) {
  
- void velvetLog(const char *format, ...)
- {
-+/*
-   static boolean timeIsSet = false;
-   static struct timeval tvStart;
-   struct timeval tvNow;
-@@ -120,6 +121,7 @@ void velvetLog(const char *format, ...)
- #ifdef DEBUG 
-   fflush(stdout);
- #endif
-+*/
+ 		totalLength += getPreNodeLength_pg(preNodeBID, preGraph);
+@@ -99,11 +99,11 @@ static void concatenatePreNodes(IDnum preNodeAID, PreArcI oldPreArc,
+ 		appendDescriptors_pg(&ptr, &writeOffset ,currentPreNodeID, preGraph, false);
+ 	}
+ 
+-	if (writeOffset != 0) 
++	if (writeOffset != 0)
+ 		while (writeOffset++ != 4)
+ 			(*ptr) >>= 2;
+ 
+-	setPreNodeDescriptor_pg(descr, totalLength - wordLength + 1, preNodeAID, preGraph); 
++	setPreNodeDescriptor_pg(descr, totalLength - wordLength + 1, preNodeAID, preGraph);
+ 
+ 	// Correct preArcs
+ 	for (preArc = getPreArc_pg(preNodeBID, preGraph); preArc != NULL_IDX;
+@@ -209,7 +209,7 @@ static boolean isEligibleTip(IDnum index, PreGraph * preGraph, Coordinate
+ 	if (currentIndex == 0)
+ 		return true;
+ 
+-	// Joined tips  
++	// Joined tips
+ 	if (simplePreArcCount_pg(-currentIndex, preGraph) < 2)
+ 		return false;
+ 
+@@ -237,24 +237,24 @@ void clipTips_pg(PreGraph * preGraph)
+ 
+ 	velvetLog("Clipping short tips off preGraph\n");
+ 
+-	while (modified) {
+-		modified = false;
+-		for (index = 1; index <= preNodeCount_pg(preGraph);
+-		     index++) {
+-			current = getPreNodeInPreGraph_pg(preGraph, index);
+-
+-			if (current == NULL)
+-				continue;
+-
+-			if (isEligibleTip(index, preGraph, cutoffLength)
+-			    || isEligibleTip(-index, preGraph,
+-					     cutoffLength)) {
+-				counter++;
+-				destroyPreNode_pg(index, preGraph);
+-				modified = true;
+-			}
+-		}
+-	}
++//	while (modified) {
++//		modified = false;
++//		for (index = 1; index <= preNodeCount_pg(preGraph);
++//		     index++) {
++//			current = getPreNodeInPreGraph_pg(preGraph, index);
++//
++//			if (current == NULL)
++//				continue;
++//
++//			if (isEligibleTip(index, preGraph, cutoffLength)
++//			    || isEligibleTip(-index, preGraph,
++//					     cutoffLength)) {
++//				counter++;
++//				destroyPreNode_pg(index, preGraph);
++//				modified = true;
++//			}
++//		}
++//	}
+ 
+ 	concatenatePreGraph_pg(preGraph);
+ 	velvetLog("%li tips cut off\n", (long) counter);
+diff --git a/src/correctedGraph.c b/src/correctedGraph.c
+index bdbf016..272af6b 100644
+--- a/src/correctedGraph.c
++++ b/src/correctedGraph.c
+@@ -764,7 +764,7 @@ static void remapNodeMarkersOntoNeighbour(Node * source,
+ 		}
+ 	}
+ 
+-	// Short read markers 
++	// Short read markers
+ 	if (readStartsAreActivated(graph)) {
+ 		// Update Coordinates
+ 		sourceArray = getNodeReads(source, graph);
+@@ -1250,7 +1250,7 @@ static void foldSymmetricalNode(Node * node)
+ 		twinNode = node;
+ 		node = tmp;
+ 	}
+-	// Destroy link to old markers 
++	// Destroy link to old markers
+ 	setMarker(node, NULL_IDX);
+ 
+ 	// Reinsert markers properly
+@@ -1951,7 +1951,7 @@ static void transferNodeData(Node * source, Node * target)
+ 	if (getNode(fastPath) == twinSource)
+ 		fastPath = getNextInSequence(fastPath);
+ 
+-	// Next node 
++	// Next node
+ 	if (source == activeNode) {
+ 		activeNode = target;
+ 		todo =
+@@ -2013,7 +2013,7 @@ static void concatenateNodesAndVaccinate(Node * nodeA, Node * nodeB,
+ 	// Read starts
+ 	concatenateReadStarts(nodeA, nodeB, graph);
+ 
+-	// Descriptor management 
++	// Descriptor management
+ 	appendDescriptors(nodeA, nodeB);
+ 
+ 	// Update uniqueness:
+@@ -2165,7 +2165,7 @@ static void cleanUpRedundancy()
+ 
+ 	//velvetLog("Concatenation\n");
+ 
+-	// Freeing up memory  
++	// Freeing up memory
+ 	if (slowMarker != NULL_IDX)
+ 		concatenatePathNodes(slowPath);
+ 	else
+@@ -2449,16 +2449,17 @@ void clipTipsHard(Graph * graph, boolean conserveLong)
+ 	int Wordlength = getWordLength(graph);
+ 	PassageMarkerI marker;
+ 
+-	velvetLog("Clipping short tips off graph, drastic\n");
++	velvetLog("NOTTTT Clipping short tips off graph, drastic\n");
+ 
+-	while (modified) {
++	while (false) {
++  //while (modified) {
+ 		modified = false;
+ 		for (index = 1; index <= nodeCount(graph); index++) {
+ 			current = getNodeInGraph(graph, index);
+ 
+ 			if (current == NULL)
+ 				continue;
+-	
++
+ 			if (conserveLong && getMarker(current))
+ 				continue;
+ 
+@@ -2558,7 +2559,7 @@ void correctGraph(Graph * argGraph, ShortLength * argSequenceLengths, Category *
+ 	eligibleStartingPoints = mallocOrExit(2 * nodes + 1, IDnum);
+ 	progressStatus = callocOrExit(2 * nodes + 1, boolean);
+ 	todoLists = callocOrExit(2 * nodes + 1, Ticket *);
+-	//Done with memory 
++	//Done with memory
+ 
+ 	resetNodeStatus(graph);
+ 	determineEligibleStartingPoints();
+@@ -2605,9 +2606,9 @@ void setMaxReadLength(int value)
+ 	if (value < 0) {
+ 		velvetLog("Negative branch length %i!\n", value);
+ 		velvetLog("Exiting...\n");
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 		abort();
+-#endif 
++#endif
+ 		exit(1);
+ 	}
+ 	MAXREADLENGTH = value;
+@@ -2619,9 +2620,9 @@ void setMaxGaps(int value)
+ 	if (value < 0) {
+ 		velvetLog("Negative max gap count %i!\n", value);
+ 		velvetLog("Exiting...\n");
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 		abort();
+-#endif 
++#endif
+ 		exit(1);
+ 	}
+ 	MAXGAPS = value;
+@@ -2633,9 +2634,9 @@ void setMaxDivergence(double value)
+ 		velvetLog("Divergence rate %lf out of bounds [0,1]!\n",
+ 		       value);
+ 		velvetLog("Exiting...\n");
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 		abort();
+-#endif 
++#endif
+ 		exit(1);
+ 	}
+ 	MAXDIVERGENCE = value;
+diff --git a/src/run.c b/src/run.c
+index 924dbbc..7c7c121 100644
+--- a/src/run.c
++++ b/src/run.c
+@@ -39,7 +39,7 @@ static void printUsage()
+ 	printf("\thash_length\t: EITHER an odd integer (if even, it will be decremented) <= %i (if above, will be reduced)\n", MAXKMERLENGTH);
+ 	printf("\t\t\t: OR: m,M,s where m and M are odd integers (if not, they will be decremented) with m < M <= %i (if above, will be reduced)\n", MAXKMERLENGTH);
+ 	puts("\t\t\t\tand s is a step (even number). Velvet will then hash from k=m to k=M with a step of s");
+-	puts("\tfilename\t: path to sequence file or - for standard input");	
++	puts("\tfilename\t: path to sequence file or - for standard input");
+ 	puts("");
+ 	puts("File format options:");
+ 	puts("\t-fasta\t-fastq\t-raw\t-fasta.gz\t-fastq.gz\t-raw.gz\t-sam\t-bam\t-fmtAuto");
+@@ -52,7 +52,7 @@ static void printUsage()
+ 	puts("Read type options:");
+ 	puts("\t-short\t-shortPaired");
+ #if CATEGORIES <= 5
+-	Category cat; 
++	Category cat;
+ 	for (cat = 2; cat <= CATEGORIES; cat++)
+ 	    printf("\t-short%i\t-shortPaired%i\n", cat, cat);
+ #else
+@@ -93,7 +93,7 @@ static void printUsage()
+ 	puts("\t\t[Both files are picked up by graph, so please leave them there]");
  }
  
- void velvetFprintf(FILE * file, const char * format, ...) 
+-int main(int argc, char **argv)
++int velveth(int argc, char **argv)
+ {
+ 	ReadSet *allSequences = NULL;
+ 	SplayTable *splayTable;
+@@ -159,18 +159,18 @@ int main(int argc, char **argv)
+ 		    ("Velvet can't handle k-mers as long as %i! We'll stick to %i if you don't mind.\n",
+ 		     hashLength, MAXKMERLENGTH);
+ 		hashLength = MAXKMERLENGTH;
+-	} 
++	}
+ 	if (hashLength <= 0) {
+ 		velvetLog("Invalid hash length: %s\n", argv[2]);
+ 		printUsage();
+ 		return 0;
+-	} 
++	}
+ 	if (hashLength % 2 == 0) {
+ 		velvetLog
+ 		    ("Velvet can't work with even length k-mers, such as %i. We'll use %i instead, if you don't mind.\n",
+ 		     hashLength, hashLength - 1);
+ 		hashLength--;
+-	} 
++	}
+ 
+ 	if (multiple_kmers) {
+ 		if (hashLengthMax > MAXKMERLENGTH + 1) {
+@@ -178,12 +178,12 @@ int main(int argc, char **argv)
+ 			    ("Velvet can't handle k-mers as long as %i! We'll stick to %i if you don't mind.\n",
+ 			     hashLengthMax, MAXKMERLENGTH + 1);
+ 			hashLengthMax = MAXKMERLENGTH + 1;
+-		} 
++		}
+ 		if (hashLengthMax <= hashLength) {
+ 			velvetLog("hashLengthMin < hashLengthMax is required %s", argv[2]);
+ 			printUsage();
+ 			return 0;
+-		} 
++		}
+ 
+ 		if (hashLengthStep <= 0) {
+ 			velvetLog("Non-positive hash length! Setting it to 2\n");
+@@ -213,7 +213,7 @@ int main(int argc, char **argv)
+ 			sprintf(buf,"%s_%d",argv[1],h);
+ 			directory = mallocOrExit(strlen(buf) + 100, char);
+ 			strcpy(directory,buf);
+-		} else 
++		} else
+ 			directory = argv[1];
+ 
+ 		filename = mallocOrExit(strlen(directory) + 100, char);
+diff --git a/src/run2.c b/src/run2.c
+index ebcc111..78cc984 100644
+--- a/src/run2.c
++++ b/src/run2.c
+@@ -68,6 +68,7 @@ static void printUsage()
+ 	puts("\t-paired_exp_fraction <double>\t: remove all the paired end connections which less than the specified fraction of the expected count (default: 0.1)");
+ 	puts("\t-shortMatePaired* <yes|no>\t: for mate-pair libraries, indicate that the library might be contaminated with paired-end reads (default no)");
+ 	puts("\t-conserveLong <yes|no>\t\t: preserve sequences with long reads in them (default no)");
++  puts("\t-tour_bus <yes|no>\t\t: apply the tour bus algorithm (default yes)");
+ 	puts("");
+ 	puts("Output:");
+ 	puts("\tdirectory/contigs.fa\t\t: fasta file of contigs longer than twice hash length");
+@@ -76,7 +77,7 @@ static void printUsage()
+ 	puts("\tdirectory/velvet_asm.afg\t: (if requested) AMOS compatible assembly file");
+ }
+ 
+-int main(int argc, char **argv)
++int velvetg(int argc, char **argv)
+ {
+ 	ReadSet *sequences = NULL;
+ 	RoadMapArray *rdmaps;
+@@ -86,6 +87,7 @@ int main(int argc, char **argv)
+ 	    *preGraphFilename, *seqFilename, *roadmapFilename,
+ 	    *lowCovContigsFilename, *highCovContigsFilename;
+ 	double coverageCutoff = -1;
++  boolean doTourBus = true;
+ 	double longCoverageCutoff = -1;
+ 	double maxCoverageCutoff = -1;
+ 	double expectedCoverage = -1;
+@@ -164,7 +166,7 @@ int main(int argc, char **argv)
+ 		return 0;
+ 	}
+ 
+-	// Memory allocation 
++	// Memory allocation
+ 	directory = argv[1];
+ 	graphFilename = mallocOrExit(strlen(directory) + 100, char);
+ 	connectedGraphFilename = mallocOrExit(strlen(directory) + 100, char);
+@@ -181,9 +183,9 @@ int main(int argc, char **argv)
+ 		if (arg_index >= argc) {
+ 			velvetLog("Unusual number of arguments!\n");
+ 			printUsage();
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 			abort();
+-#endif 
++#endif
+ 			exit(1);
+ 		}
+ 
+@@ -210,9 +212,9 @@ int main(int argc, char **argv)
+ 			if (insertLength[0] < 0) {
+ 				velvetLog("Invalid insert length: %lli\n",
+ 				       (long long) insertLength[0]);
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 				abort();
+-#endif 
++#endif
+ 				exit(1);
+ 			}
+ 		} else if (strcmp(arg, "-ins_length_sd") == 0) {
+@@ -221,9 +223,9 @@ int main(int argc, char **argv)
+ 			if (std_dev[0] < 0) {
+ 				velvetLog("Invalid std deviation: %lli\n",
+ 				       (long long) std_dev[0]);
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 				abort();
+-#endif 
++#endif
+ 				exit(1);
+ 			}
+ 		} else if (strcmp(arg, "-ins_length_long") == 0) {
+@@ -238,9 +240,9 @@ int main(int argc, char **argv)
+ 			cat = (Category) short_var;
+ 			if (cat < 1 || cat > CATEGORIES) {
+ 				velvetLog("Unknown option: %s\n", arg);
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 				abort();
+-#endif 
++#endif
+ 				exit(1);
+ 			}
+ 			sscanf(argv[arg_index], "%lli", &longlong_var);
+@@ -248,9 +250,9 @@ int main(int argc, char **argv)
+ 			if (insertLength[cat - 1] < 0) {
+ 				velvetLog("Invalid insert length: %lli\n",
+ 				       (long long) insertLength[cat - 1]);
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 				abort();
+-#endif 
++#endif
+ 				exit(1);
+ 			}
+ 		} else if (strncmp(arg, "-ins_length", 11) == 0) {
+@@ -258,9 +260,9 @@ int main(int argc, char **argv)
+ 			cat = (Category) short_var;
+ 			if (cat < 1 || cat > CATEGORIES) {
+ 				velvetLog("Unknown option: %s\n", arg);
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 				abort();
+-#endif 
++#endif
+ 				exit(1);
+ 			}
+ 			sscanf(argv[arg_index], "%lli", &longlong_var);
+@@ -268,9 +270,9 @@ int main(int argc, char **argv)
+ 			if (std_dev[cat - 1] < 0) {
+ 				velvetLog("Invalid std deviation: %lli\n",
+ 				       (long long) std_dev[cat - 1]);
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 				abort();
+-#endif 
++#endif
+ 				exit(1);
+ 			}
+ 		} else if (strcmp(arg, "-read_trkg") == 0) {
+@@ -353,6 +355,9 @@ int main(int argc, char **argv)
+ 				exit(1);
+ 			}
+ 			shadows[cat - 1] = (strcmp(argv[arg_index], "yes") == 0);
++    } else if (strcmp(arg,"-tour_bus") == 0){
++      if (strcmp(argv[arg_index], "no") == 0)
++        doTourBus = false;
+ 		} else if (strcmp(arg, "--help") == 0) {
+ 			printUsage();
+ 			return 0;
+@@ -452,7 +457,8 @@ int main(int argc, char **argv)
+ 
+ 		sequenceLengths =
+ 		    getSequenceLengths(sequences, getWordLength(graph));
+-		correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
++    if (doTourBus)
++        correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
+ 		exportGraph(graphFilename, graph, sequences->tSequences);
+ 	} else if ((file = fopen(preGraphFilename, "r")) != NULL) {
+ 		fclose(file);
+@@ -468,7 +474,8 @@ int main(int argc, char **argv)
+ 				   roadmapFilename, readTracking, accelerationBits);
+ 		sequenceLengths =
+ 		    getSequenceLengths(sequences, getWordLength(graph));
+-		correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
++    if (doTourBus)
++        correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
+ 		exportGraph(graphFilename, graph, sequences->tSequences);
+ 	} else if ((file = fopen(roadmapFilename, "r")) != NULL) {
+ 		fclose(file);
+@@ -523,13 +530,14 @@ int main(int argc, char **argv)
+ 				   roadmapFilename, readTracking, accelerationBits);
+ 		sequenceLengths =
+ 		    getSequenceLengths(sequences, getWordLength(graph));
+-		correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
++    if (doTourBus)
++        correctGraph(graph, sequenceLengths, sequences->categories, conserveLong);
+ 		exportGraph(graphFilename, graph, sequences->tSequences);
+ 	} else {
+ 		velvetLog("No Roadmap file to build upon! Please run velveth (see manual)\n");
+-#ifdef DEBUG 
++#ifdef DEBUG
+ 		abort();
+-#endif 
++#endif
+ 		exit(1);
+ 	}
+ 
+@@ -553,11 +561,11 @@ int main(int argc, char **argv)
+ 			coverageCutoff = expectedCoverage / 2;
+ 			estimateCutoff = true;
+ 		}
+-	} else { 
++	} else {
+ 		estimateCoverage = false;
+-		if (coverageCutoff < 0 && estimateCutoff) 
++		if (coverageCutoff < 0 && estimateCutoff)
+ 			coverageCutoff = estimated_cov(graph, directory) / 2;
+-		else 
++		else
+ 			estimateCutoff = false;
+ 	}
+ 
+@@ -580,7 +588,7 @@ int main(int argc, char **argv)
+ 	if (minContigLength < 2 * getWordLength(graph))
+ 		minContigKmerLength = getWordLength(graph);
+ 	else
+-		minContigKmerLength = minContigLength - getWordLength(graph) + 1;		
++		minContigKmerLength = minContigLength - getWordLength(graph) + 1;
+ 
+ 	dubious =
+ 	    removeLowCoverageNodesAndDenounceDubiousReads(graph,
+@@ -635,7 +643,7 @@ int main(int argc, char **argv)
+ 	strcpy(graphFilename, directory);
+ 	strcat(graphFilename, "/contigs.fa");
+ 	sequenceLengths = getSequenceLengths(sequences, getWordLength(graph));
+-	exportLongNodeSequences(graphFilename, graph, minContigKmerLength, sequences, sequenceLengths, coverageMask); 
++	exportLongNodeSequences(graphFilename, graph, minContigKmerLength, sequences, sequenceLengths, coverageMask);
+ 
+ 	if (exportAlignments) {
+ 		strcpy(graphFilename, directory);
+@@ -663,9 +671,9 @@ int main(int argc, char **argv)
+ 	if (unusedReads)
+ 		exportUnusedReads(graph, sequences, minContigKmerLength, directory);
+ 
+-	if (estimateCoverage) 
++	if (estimateCoverage)
+ 		velvetLog("Estimated Coverage = %f\n", expectedCoverage);
+-	if (estimateCutoff) 
++	if (estimateCutoff)
+ 		velvetLog("Estimated Coverage cutoff = %f\n", coverageCutoff);
+ 
+ 	logFinalStats(graph, minContigKmerLength, directory);
+@@ -673,25 +681,25 @@ int main(int argc, char **argv)
+ 	if (clean > 0) {
+ 		strcpy(graphFilename, directory);
+ 		strcat(graphFilename, "/Roadmaps");
+-		remove(graphFilename);	
++		remove(graphFilename);
+ 
+ 		strcpy(graphFilename, directory);
+ 		strcat(graphFilename, "/LastGraph");
+-		remove(graphFilename);	
+-	} 
++		remove(graphFilename);
++	}
+ 
+ 	if (clean > 1) {
+ 		strcpy(graphFilename, directory);
+ 		strcat(graphFilename, "/Sequences");
+-		remove(graphFilename);	
++		remove(graphFilename);
+ 
+ 		strcpy(graphFilename, directory);
+ 		strcat(graphFilename, "/Graph2");
+-		remove(graphFilename);	
++		remove(graphFilename);
+ 
+ 		strcpy(graphFilename, directory);
+ 		strcat(graphFilename, "/Graph");
+-		remove(graphFilename);	
++		remove(graphFilename);
+ 	}
+ 
+ 	free(sequenceLengths);

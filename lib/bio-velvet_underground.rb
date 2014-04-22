@@ -44,6 +44,7 @@ module Bio
 
         attach_graph_functions
         attach_binary_sequence_functions
+        attach_runner_functions
       end
     end
   end
@@ -51,4 +52,5 @@ end
 
 require 'bio-velvet_underground/binary_sequence_store'
 require 'bio-velvet_underground/graph'
+require 'bio-velvet_underground/runner'
 

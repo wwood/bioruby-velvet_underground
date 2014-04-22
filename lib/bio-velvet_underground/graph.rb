@@ -12,7 +12,7 @@ class Bio::Velvet::Underground
 
     # Read in a graph from a file
     def self.parse_from_file(path)
-      # First read the first line of the file to determine which library to load
+      # First read the first line of the file to determine which underground velvet library to load
       hash_length = nil
       CSV.foreach(path, :col_sep => "\t") do |row|
         raise "Badly formatted graph file" if row.length < 3
@@ -136,6 +136,7 @@ class Bio::Velvet::Underground
 
     end
 
+    # TODO: this class is currently unimplemented.
     class ArcArray
       def initialize(graph_struct)
         @internal_graph_struct = graph_struct
