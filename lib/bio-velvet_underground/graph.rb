@@ -47,8 +47,16 @@ class Bio::Velvet::Underground
 
 
     class NodeArray
+      include Enumerable
+
       def initialize(graph)
         @graph = graph
+      end
+
+      def each
+        (1..length).each do |node_id|
+          yield self[node_id]
+        end
       end
 
       def length
