@@ -1,5 +1,4 @@
 class Bio::Velvet::Underground
-  #TODO: this class is under construction
   class Runner
     # Run velveth and velvetg, selecting the most memory efficient library for the purpose
     #
@@ -54,7 +53,6 @@ class Bio::Velvet::Underground
   end
 
   def self.attach_runner_functions
-    #TODO: fix these functions by modifying the input source code
     attach_function :velveth, [:int32, :pointer], :int32
     attach_function :velvetg, [:int32, :pointer], :int32
   end
