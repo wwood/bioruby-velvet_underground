@@ -20,7 +20,7 @@ Running velvet returns a `Result` object, which is effectively a pointer to a ve
 ```ruby
 require 'bio-velvet_underground'
 
-#kmer 29, '-short my.fasta' the argument to velveth, no special arguments given to velveth.
+#kmer 29, '-short my.fasta' the argument to velveth, no special arguments given to velvetg.
 result = Bio::Velvet::Runner.new.velvet(29,"-short my.fasta",'')
 result.result_directory #=> path to temporary directory, containing velvet generated files e.g. contigs.fna
 
