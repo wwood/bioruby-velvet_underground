@@ -2,15 +2,14 @@
 
 [![Build Status](https://secure.travis-ci.org/wwood/bioruby-velvet_underground.png)](http://travis-ci.org/wwood/bioruby-velvet_underground)
 
-This biogem is aimed at providing Ruby bindings to the velvet assembler's source code.
-
-Note: this software is under active development!
+This biogem is aimed at providing Ruby bindings to the velvet assembler's source code. See also [bio-velvet](https://github.com/wwood/bioruby-velvet) for Ruby code that does not bind the velvet C.
 
 ## Installation
 
 ```sh
 gem install bio-velvet_underground
 ```
+This can take a few minutes as several versions of velvet with different kmer sizes are compiled.
 
 ## Usage
 
@@ -41,7 +40,6 @@ seqs = Bio::Velvet::Underground::BinarySequenceStore.new '/path/to/velvet/direct
 seqs.length #=> 77 (there is 77 sequences in the CnyUnifiedSeq)
 seqs[1] #=> 'CACTTATCTCTACCAAAGATCACGATTTAGAATCAAACTATAAAGTTTTAGAAGATAAAGTAACAACTTATACATGGGGA'
 seqs[0] #=> nil (indices map directly to the indices in other velvet files)
-
 ```
 
 ### Working with LastGraph file
@@ -68,7 +66,13 @@ Patches to these and other parts of velvet welcome.
 ## Development practice
 
 The velvet C code 'underground' here is for the most part vanilla velvet code as you might expect.
-However some changes were necessary to allow binding from this biogem. Also,
+However some changes were necessary to allow binding from this biogem. For instance the library
+does not write to `$stdout` as this interferes with Ruby's writes to `$stdout`.
+
+There are also some extra options for controlling velvet's behaviour, geared towards taking 
+some of the guesswork out of the assembly process at the expense of a less resolved `LastGraph`.
+These are currently non-standard modifications - get in touch with @wwood if you are interested. 
+Not invoking these options should leave 'normal' velvet behaviour intact.
 
 ## Project home page
 
