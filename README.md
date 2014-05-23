@@ -29,7 +29,12 @@ Patches to other parts of velvet welcome.
 
 The API doc is online. For more code examples see the test files in
 the source tree.
-        
+
+## Development practice
+
+The velvet C code 'underground' here is for the most part vanilla velvet code as you might expect.
+However some changes were necessary to allow binding from this biogem. Also,
+
 ## Project home page
 
 Information on the source tree, documentation, examples, issues and
