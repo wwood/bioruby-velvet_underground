@@ -20,12 +20,10 @@ Running velvet returns a `Result` object, which is effectively a pointer to a ve
 ```ruby
 require 'bio-velvet_underground'
 
-#kmer 29, '-short my.fasta' the argument to velveth, no special arguments given to velvetg.
-result = Bio::Velvet::Runner.new.velvet(29,"-short my.fasta",'')
-result.result_directory #=> path to temporary directory, containing velvet generated files e.g. contigs.fna
-
+# Run assembly with kmer 29, '-short my.fasta' the arguments to velveth (not including kmer and directory),
+# no special arguments given to velvetg.
 # A pre-defined velvet result directory:
-result = Bio::Velvet::Runner.new.velvet(29,"-short my.fasta",'',:output_assembly_path => '/path/to/result')
+result = Bio::Velvet::Runner.new.velvet(29, %w(-short my.fasta),[],:output_assembly_path => '/path/to/result')
 result.result_directory #=> '/path/to/result'
 ```
 With the magic of Ruby-FFI, the library with the smallest kmer size >= 29 is chosen (in this case 31).
