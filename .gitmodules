@@ -1,3 +1,4 @@
 [submodule "ext/src"]
 	path = ext/src
+	branch = underground
 	url = https://github.com/wwood/velvet

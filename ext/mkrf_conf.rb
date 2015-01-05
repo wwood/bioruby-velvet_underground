@@ -27,7 +27,6 @@ require File.join(File.dirname(__FILE__), "../lib/bio-velvet_underground/constan
 
 task :compile do
   cd(File.join(File.dirname(__FILE__),'src')) do
-    sh "patch -p1 < ../bioruby.patch"
     case Config::CONFIG['host_os']
       when /linux/
 
