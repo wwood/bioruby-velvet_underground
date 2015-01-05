@@ -1,0 +1,1 @@
+ben@ben:~/git/bioruby-velvet_underground/spec/data$ /srv/sw/velvet/1.2.08-kmer255/velveth 5_singles_and_pairs/ 31 -short -fasta.gz ../../ext/src/tests/reads.fa.gz -shortPaired -fastq.gz ../../ext/src/tests/reads.fq.gz -create_binary
