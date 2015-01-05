@@ -119,14 +119,16 @@ class Bio::Velvet::Underground
       end
 
       def fwd_short_reads
+        return @short_reads unless @short_reads.nil?
         array_start_pointer = Bio::Velvet::Underground.getNodeReads @internal_node_struct, @graph.internal_graph_struct
         num_short_reads = Bio::Velvet::Underground.getNodeReadCount @internal_node_struct, @graph.internal_graph_struct
-        short_reads = (0...num_short_reads).collect do |i|
+        struct_size = Bio::Velvet::Underground::ShortReadMarker.size #calculate once for performance
+        @short_reads = 0.step(num_short_reads-1, 1).collect do |i|
           # Use the fact that FFI pointers can do pointer arithmetic
-          pointer = array_start_pointer+(i*Bio::Velvet::Underground::ShortReadMarker.size)
+          pointer = array_start_pointer+(i*struct_size)
           NodedRead.new Bio::Velvet::Underground::ShortReadMarker.new(pointer), true
         end
-        return short_reads
+        return @short_reads
       end
 
       def rev_short_reads
@@ -141,7 +143,6 @@ class Bio::Velvet::Underground
         end
         return reads
       end
-
     end
 
     # TODO: this class is currently unimplemented.

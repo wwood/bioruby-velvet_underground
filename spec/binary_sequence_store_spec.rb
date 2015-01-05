@@ -36,4 +36,13 @@ describe "binary sequence store" do
     seqs.pair_id(5).should == 6
     seqs.pair_id(6).should == 5
   end
+
+  it 'should be able to understand non-mates and mates in the same run' do
+    path = File.join TEST_DATA_DIR, '5_singles_and_pairs', 'CnyUnifiedSeq'
+    seqs = Bio::Velvet::Underground::BinarySequenceStore.new path
+    seqs.pair_id(1).should == nil
+    seqs.pair_id(50000).should == nil
+    seqs.pair_id(50001).should == 50002
+    seqs.pair_id(100000).should == 99999
+  end
 end

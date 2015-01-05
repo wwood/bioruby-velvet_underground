@@ -24,6 +24,18 @@ class Bio::Velvet::Underground
       @readset[:readCount]
     end
 
+    # Return true if paired, else false
+    def paired?(sequence_id)
+      cat = FFI::Pointer.new(:int8, @readset[:categories])[sequence_id-1].read_int8
+      if cat == 0
+        return false
+      elsif cat == 1
+        return true
+      else
+        raise "Unexpected velvet sequence category found: #{cat}"
+      end
+    end
+
     # Returns true if the sequence ID refers to the
     # second in a pair of sequences.
     def is_second_in_pair?(sequence_id)
@@ -33,8 +45,10 @@ class Bio::Velvet::Underground
       Bio::Velvet::Underground.isSecondInPair @readset, sequence_id-1
     end
 
-    # Returns the ID of the given sequence_id's pair
+    # Returns the ID of the given sequence_id's pair, or nil if it is not a
+    # paired sequence
     def pair_id(sequence_id)
+      return nil unless paired?(sequence_id)
       if is_second_in_pair?(sequence_id)
         sequence_id-1
       else
@@ -79,6 +93,9 @@ class Bio::Velvet::Underground
     # TightString *getTightStringInArray(TightString * tString,
     #			   IDnum	 position);
     attach_function :getTightStringInArray, [:pointer, :int32], :pointer
+
+    # int pairedCategories(ReadSet * reads);
+    attach_function :pairedCategories, [:pointer], :int
 
     # boolean isSecondInPair(ReadSet * reads, IDnum index);
     attach_function :isSecondInPair, [:pointer, :int32], :bool
