@@ -1,4 +1,5 @@
 require 'csv'
+require 'bio-velvet'
 
 class Bio::Velvet::Underground
 
@@ -34,7 +35,7 @@ class Bio::Velvet::Underground
     end
 
     def nodes
-      NodeArray.new self
+      @nodes ||= NodeArray.new self #cache node array
     end
 
     def node_count
@@ -51,6 +52,7 @@ class Bio::Velvet::Underground
 
       def initialize(graph)
         @graph = graph
+        @node_cache = []
       end
 
       def each
@@ -64,10 +66,13 @@ class Bio::Velvet::Underground
       end
 
       def [](node_id)
+        cache = @node_cache[node_id]
+        return cache unless cache.nil?
+
         return nil if node_id < 1 or node_id > @graph.internal_graph_struct[:nodeCount]
         pointer = Bio::Velvet::Underground.getNodeInGraph @graph.internal_graph_struct, node_id
         node_struct = Bio::Velvet::Underground::NodeStruct.new pointer
-        Node.new(@graph, node_struct)
+        @node_cache[node_id] = Node.new(@graph, node_struct)
       end
     end
 
@@ -80,11 +85,11 @@ class Bio::Velvet::Underground
       end
 
       def node_id
-        @internal_node_struct[:ID]
+        @node_id ||= @internal_node_struct[:ID]
       end
 
       def length_alone
-        @internal_node_struct[:length]
+        @length_alone ||= @internal_node_struct[:length]
       end
 
       def coverages
@@ -95,13 +100,14 @@ class Bio::Velvet::Underground
       end
 
       def ends_of_kmers_of_node
+        return @ends_of_kmers_of_node unless @ends_of_kmers_of_node.nil?
         seq = []
         key = %w(A C G T)
         0.upto(length_alone-1) do |i|
           n = Bio::Velvet::Underground.getNucleotideInNode(@internal_node_struct, i)
           seq.push key[n]
         end
-        return seq.join
+        @ends_of_kmers_of_node = seq.join
       end
 
       def ends_of_kmers_of_twin_node
@@ -123,10 +129,13 @@ class Bio::Velvet::Underground
         array_start_pointer = Bio::Velvet::Underground.getNodeReads @internal_node_struct, @graph.internal_graph_struct
         num_short_reads = Bio::Velvet::Underground.getNodeReadCount @internal_node_struct, @graph.internal_graph_struct
         struct_size = Bio::Velvet::Underground::ShortReadMarker.size #calculate once for performance
-        @short_reads = 0.step(num_short_reads-1, 1).collect do |i|
+
+        # Return a hash of read_id => short_read object
+        @short_reads = Bio::Velvet::Graph::NodedReadArray.new
+        0.step(num_short_reads-1, 1).each do |i|
           # Use the fact that FFI pointers can do pointer arithmetic
           pointer = array_start_pointer+(i*struct_size)
-          NodedRead.new Bio::Velvet::Underground::ShortReadMarker.new(pointer), true
+          @short_reads.push(NodedRead.new(Bio::Velvet::Underground::ShortReadMarker.new(pointer), true))
         end
         return @short_reads
       end
@@ -136,12 +145,13 @@ class Bio::Velvet::Underground
       end
 
       def short_reads
-        reads = fwd_short_reads
+        return @reads unless @reads.nil?
+        @reads = fwd_short_reads
         rev_short_reads.each do |read|
           read.direction = false
-          reads.push read
+          @reads.push read
         end
-        return reads
+        return @reads
       end
     end
 
@@ -165,15 +175,15 @@ class Bio::Velvet::Underground
       end
 
       def read_id
-        @internal_short_read_struct[:readID]
+        @read_id ||= @internal_short_read_struct[:readID]
       end
 
       def offset_from_start_of_node
-        @internal_short_read_struct[:position]
+        @offset_from_start_of_node ||= @internal_short_read_struct[:position]
       end
 
       def start_coord
-        @internal_short_read_struct[:offset]
+        @start_coord ||= @internal_short_read_struct[:offset]
       end
     end
   end

@@ -5,6 +5,7 @@ source "http://rubygems.org"
 
 gem 'ffi', '~> 1.9'
 gem 'bio-logger', '~> 1.0'
+gem 'bio-velvet', '~> 0.6'
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.

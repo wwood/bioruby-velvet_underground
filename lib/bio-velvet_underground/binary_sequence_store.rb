@@ -55,6 +55,12 @@ class Bio::Velvet::Underground
         sequence_id+1
       end
     end
+
+    # Return the number of libraries used in this sequence store that were paired-end
+    # e.g.
+    def num_paired_end_readsets
+      Bio::Velvet::Underground.pairedCategories(@readset)
+    end
   end
 
   private
