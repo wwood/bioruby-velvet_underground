@@ -27,7 +27,7 @@ require File.join(File.dirname(__FILE__), "../lib/bio-velvet_underground/constan
 
 task :compile do
   cd(File.join(File.dirname(__FILE__),'src')) do
-    case Config::CONFIG['host_os']
+    case RbConfig::CONFIG['host_os']
       when /linux/
 
         # Create library with default install params
